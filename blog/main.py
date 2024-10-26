@@ -61,5 +61,6 @@ def create_user(request:schemas.User,db: Session=Depends(get_db)):
     new_user=models.User(request)
     db.add(new_user)
     db.commit()
-    db.refresh(new_user)
+    db.refresh()
     return new_user
+
