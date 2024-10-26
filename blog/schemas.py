@@ -17,3 +17,10 @@ class User(BaseModel):
     email:str
     password:str
     phonenumber:int
+
+class ShowUser(BaseModel):
+    name:str 
+    email:str
+    phonenumber:int
+    class Config():
+        from_attributes=True

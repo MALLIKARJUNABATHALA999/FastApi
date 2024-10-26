@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import FastAPI,Depends,status,Response,HTTPException
-from . import schemas,models
+from . import schemas,models,hashing
 from .database import engine,SessionLocal
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 
 myapp=FastAPI()
 
@@ -56,11 +57,19 @@ def update(id,request:schemas.Blog,db:Session=Depends(get_db)):
     db.commit()
     return {'updated successfully'}
 
-@myapp.post('/user')
+
+pwd_cxt=CryptContext(schemes=["bcrypt"],deprecated="auto")
+@myapp.post('/user',response_models=schemas.ShowUser)
 def create_user(request:schemas.User,db: Session=Depends(get_db)):
-    new_user=models.User(request)
+    
+    new_user=models.User(name=request.name,email=request.email,password=hashing.Hash.bcrypt(request.password),phonenumber=request.phonenumber)
     db.add(new_user)
     db.commit()
-    db.refresh()
+    db.refresh(new_user)
     return new_user
+
+@myapp.get("/user")
+def all(db: Session=Depends(get_db)):
+    blogs=db.query(models.User).all()
+    return blogs
 
